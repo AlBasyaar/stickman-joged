@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stickman</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background-color: #2ca4ff;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    svg {
+      width: 200px;
+      height: 400px;
+    }
+
+    .line {
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    circle {
+      stroke: white;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .draggable-area {
+      cursor: grab;
+    }
+  </style>
+</head>
+<body>
+
+<div>
+  <svg id="stickman" viewBox="0 0 100 200" preserveAspectRatio="xMidYMid meet" class="draggable-area">
+    <!-- Kepala -->
+    <circle cx="50" cy="30" r="15" />
+
+    <!-- Badan -->
+    <line id="body" x1="50" y1="45" x2="50" y2="100" class="line" />
+
+    <!-- Pinggul -->
+    <line id="hip" x1="50" y1="100" x2="50" y2="110" class="line" />
+
+    <!-- Kaki -->
+    <line id="left-leg" x1="50" y1="110" x2="30" y2="140" class="line" />
+    <line id="right-leg" x1="50" y1="110" x2="70" y2="140" class="line" />
+    <circle cx="30" cy="140" r="3" />
+    <circle cx="70" cy="140" r="3" />
+
+    <!-- Tangan -->
+    <line x1="50" y1="45" x2="35" y2="70" class="line" />
+    <line x1="35" y1="70" x2="40" y2="30" class="line" />
+    <line x1="50" y1="45" x2="65" y2="70" class="line" />
+    <line x1="65" y1="70" x2="60" y2="30" class="line" />
+  </svg>
+</div>
+
+<script>
+  const svg = document.getElementById("stickman");
+  let isDragging = false;
+
+  // Aktifkan drag saat mouse down
+  svg.addEventListener("mousedown", () => {
+    isDragging = true;
+  });
+
+  // Nonaktifkan saat mouse dilepas
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+
+  // Gerakan stickman saat mouse move dan sedang drag
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging || !document.hasFocus()) return;
+
+    const rect = svg.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const x1 = 50;
+    const y1 = 45;
+    const bodyLength = 55;
+
+    const dx = mouseX - x1;
+    const dy = mouseY - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const scale = bodyLength / distance;
+
+    const x2 = x1 + dx * scale;
+    const y2 = y1 + dy * scale;
+
+    const body = document.getElementById("body");
+    body.setAttribute("x2", x2);
+    body.setAttribute("y2", y2);
+
+    const hip = document.getElementById("hip");
+    hip.setAttribute("x1", x2);
+    hip.setAttribute("y1", y2);
+    hip.setAttribute("x2", x2);
+    hip.setAttribute("y2", y2 + 10);
+
+    const leftLeg = document.getElementById("left-leg");
+    const rightLeg = document.getElementById("right-leg");
+
+    leftLeg.setAttribute("x1", x2);
+    leftLeg.setAttribute("y1", y2 + 10);
+    rightLeg.setAttribute("x1", x2);
+    rightLeg.setAttribute("y1", y2 + 10);
+  });
+</script>
+
+</body>
+</html>
