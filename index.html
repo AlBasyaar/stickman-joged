@@ -14,6 +14,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      touch-action: none; /* mencegah scrolling saat drag di mobile */
     }
 
     svg {
@@ -69,54 +70,62 @@
   const svg = document.getElementById("stickman");
   let isDragging = false;
 
-  // Aktifkan drag saat mouse down
-  svg.addEventListener("mousedown", () => {
-    isDragging = true;
-  });
+  const body = document.getElementById("body");
+  const hip = document.getElementById("hip");
+  const leftLeg = document.getElementById("left-leg");
+  const rightLeg = document.getElementById("right-leg");
 
-  // Nonaktifkan saat mouse dilepas
-  document.addEventListener("mouseup", () => {
-    isDragging = false;
-  });
+  const x1 = 50;
+  const y1 = 45;
+  const bodyLength = 55;
 
-  // Gerakan stickman saat mouse move dan sedang drag
-  document.addEventListener("mousemove", (e) => {
-    if (!isDragging || !document.hasFocus()) return;
-
+  function updateStickman(mouseX, mouseY) {
     const rect = svg.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const relX = mouseX - rect.left;
+    const relY = mouseY - rect.top;
 
-    const x1 = 50;
-    const y1 = 45;
-    const bodyLength = 55;
-
-    const dx = mouseX - x1;
-    const dy = mouseY - y1;
+    const dx = relX - x1;
+    const dy = relY - y1;
     const distance = Math.sqrt(dx * dx + dy * dy);
     const scale = bodyLength / distance;
 
     const x2 = x1 + dx * scale;
     const y2 = y1 + dy * scale;
 
-    const body = document.getElementById("body");
     body.setAttribute("x2", x2);
     body.setAttribute("y2", y2);
 
-    const hip = document.getElementById("hip");
     hip.setAttribute("x1", x2);
     hip.setAttribute("y1", y2);
     hip.setAttribute("x2", x2);
     hip.setAttribute("y2", y2 + 10);
 
-    const leftLeg = document.getElementById("left-leg");
-    const rightLeg = document.getElementById("right-leg");
-
     leftLeg.setAttribute("x1", x2);
     leftLeg.setAttribute("y1", y2 + 10);
     rightLeg.setAttribute("x1", x2);
     rightLeg.setAttribute("y1", y2 + 10);
+  }
+
+  // Desktop Events
+  svg.addEventListener("mousedown", () => isDragging = true);
+  document.addEventListener("mouseup", () => isDragging = false);
+  document.addEventListener("mousemove", (e) => {
+    if (isDragging) updateStickman(e.clientX, e.clientY);
   });
+
+  // Mobile Events
+  svg.addEventListener("touchstart", (e) => {
+    isDragging = true;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener("touchend", () => isDragging = false);
+  document.addEventListener("touchmove", (e) => {
+    if (isDragging) {
+      const touch = e.touches[0];
+      updateStickman(touch.clientX, touch.clientY);
+    }
+  }, { passive: false });
 </script>
 
 </body>
